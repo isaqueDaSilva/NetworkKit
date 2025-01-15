@@ -17,16 +17,23 @@ let package = Package(
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
             name: "NetworkKit",
-            targets: ["NetworkKit"]),
+            targets: ["NetworkHandler", "WebSocketHandler"]
+        ),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "NetworkKit"),
+            name: "NetworkHandler"),
         .testTarget(
-            name: "NetworkKitTests",
-            dependencies: ["NetworkKit"]
+            name: "NetworkHandlerTests",
+            dependencies: ["NetworkHandler"]
+        ),
+        .target(
+            name: "WebSocketHandler"),
+        .testTarget(
+            name: "WebSocketHandlerTests",
+            dependencies: ["WebSocketHandler"]
         ),
     ]
 )

@@ -22,8 +22,8 @@ struct NetworkHandlerTest {
         let handler = NetworkHandler<ExecutionErrorMock>(
             endpoint: endpoint.endpoint,
             session: urlSession,
-            unkwnonURLRequestError: .failureToCreateAnURLRequest,
-            failureToGetDataError: .runFailure
+            unkwnonURLRequestError: ExecutionErrorMock.failureToCreateAnURLRequest,
+            failureToGetDataError: ExecutionErrorMock.runFailure
         )
         
         guard let url = URL(string: endpoint.urlString) else {
@@ -63,8 +63,8 @@ struct NetworkHandlerTest {
         let handler = NetworkHandler<ExecutionErrorMock>(
             endpoint: endpoint.endpoint,
             session: urlSession,
-            unkwnonURLRequestError: .failureToCreateAnURLRequest,
-            failureToGetDataError: .runFailure
+            unkwnonURLRequestError: ExecutionErrorMock.failureToCreateAnURLRequest,
+            failureToGetDataError: ExecutionErrorMock.runFailure
         )
         
         guard let url = URL(string: endpoint.urlString) else {

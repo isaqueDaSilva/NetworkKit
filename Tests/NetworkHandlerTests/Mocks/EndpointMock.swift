@@ -6,7 +6,7 @@
 //
 
 import Foundation
-@testable import NetworkHandler
+@testable import Common
 
 struct EndpointMock {
     let scheme = "http"

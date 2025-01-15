@@ -5,6 +5,7 @@
 //  Created by Isaque da Silva on 1/14/25.
 //
 
+import Common
 import Foundation
 
 /// Representation layer to handler with network tasks
@@ -26,7 +27,7 @@ public struct NetworkHandler<ExecutionError: Error>: Sendable {
     /// - Returns: Returns a tuple that contains a `Data` and an `URLResponse`
     ///  that coming after the task execution.
     public func getResponse() async throws(ExecutionError) -> (Data, URLResponse) {
-        let request = endpoint.makeRequest()
+        let request = endpoint.urlRequest
         
         guard let request else {
             throw unkwnonURLRequestError

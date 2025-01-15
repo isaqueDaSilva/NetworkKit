@@ -1,0 +1,83 @@
+//
+//  Endpoint.swift
+//  NetworkKit
+//
+//  Created by Isaque da Silva on 1/14/25.
+//
+
+import Foundation
+
+/// Representation structure to make an Endpoint,
+public struct Endpoint: Sendable {
+    /// String representation of what representation
+    /// or diagram that outlines the configuration
+    /// and relationships of a computer network like `https`.
+    private var scheme: String
+    
+    /// The host's representation of the place where it will be accessed.
+    private var host: String
+    
+    /// The path representation to access an specific URI of the host.
+    private var path: String
+    
+    /// The HTTP method that we'll used to access or perform action in the URI.
+    private var httpMethod: HTTPMethod
+    
+    /// The headers that we'll utilize to make request.
+    private var headers: [String: String]?
+    
+    /// The data that will be send to the request
+    private var body: Data?
+    
+    public var urlRequest: URLRequest? {
+        makeRequest()
+    }
+    
+    /// Creates an URLRequest instance to perform the desired task.
+    /// - Returns: Returns a configured URLRequest instance to perform task.
+    internal func makeRequest() -> URLRequest? {
+        var urlComponent = URLComponents()
+        urlComponent.scheme = scheme
+        urlComponent.host = host
+        urlComponent.path = path
+        
+        guard let url = urlComponent.url else {
+            return nil
+        }
+        
+        let request = Request.makeRequest(
+            forURL: url,
+            httpMethod: httpMethod,
+            headers: headers,
+            body: body
+        )
+        
+        return request
+    }
+    
+    /// Creates a new instance of the Endpoint type.
+    /// - Parameters:
+    ///   - scheme: Representation that outlines the configuration
+    ///   and relationships of a computer network like `https`.
+    ///   - host: Rpresentation of the place where it will be accessed.
+    ///   - path: Representation of an specific URI of the host.
+    ///   - httpMethod: The HTTP method that we'll used to perform the task.
+    ///   - headers: Desired HTTP headers to utilize to make request.
+    ///   - body: An optional data to be send when the task will performed.
+    public init(
+        scheme: String = "https",
+        host: String,
+        path: String,
+        httpMethod: HTTPMethod,
+        headers: [String : String]? = nil,
+        body: Data? = nil
+    ) {
+        self.scheme = scheme
+        self.host = host
+        self.path = path
+        self.httpMethod = httpMethod
+        self.headers = headers
+        self.body = body
+    }
+}
+

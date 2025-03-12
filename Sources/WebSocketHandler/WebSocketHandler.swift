@@ -32,6 +32,12 @@ public struct WebSocketHandler<ReceivedMessage: Codable & Sendable, ExecutionErr
     private let unknownError: ExecutionError
     private let noConnection: ExecutionError
     
+    /// Starts the WebSocket channel
+    public mutating func start() async throws {
+        self.wsUpgrader = try await getUpgraderResult()
+        try await self.upgradeChannel()
+    }
+    
     /// Establish the WebSoclet channel connection
     /// - Returns: Returns a `EventLoopFuture` for handle with the WebSocket channel
     private func getUpgraderResult() async throws -> EventLoopFuture<UpgradeResult> {

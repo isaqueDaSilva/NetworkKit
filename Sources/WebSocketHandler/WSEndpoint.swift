@@ -8,14 +8,14 @@
 import Foundation
 import NIOHTTP1
 
-struct WSEndpoint: Sendable {
+public struct WSEndpoint: Sendable {
     internal let scheme: String
     internal let host: String
     internal let port: Int
     internal let uri: String
     internal var headers: HTTPHeaders
     
-    init(
+    public init(
         scheme: String,
         host: String,
         port: Int,

@@ -209,9 +209,9 @@ public struct WebSocketHandler<ReceivedMessage: Codable & Sendable, ExecutionErr
         }
     }
     
-    init(
+    public init(
         endpoint: WSEndpoint,
-        eventLoopGroup: MultiThreadedEventLoopGroup,
+        eventLoopGroup: MultiThreadedEventLoopGroup = .singleton,
         decodingError: ExecutionError,
         unknownError: ExecutionError,
         noConnection: ExecutionError

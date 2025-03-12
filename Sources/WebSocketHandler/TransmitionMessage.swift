@@ -6,5 +6,5 @@
 //
 
 public struct TransmitionMessage: Sendable {
-    let message: any Codable & Sendable
+    public let message: any Codable & Sendable
 }

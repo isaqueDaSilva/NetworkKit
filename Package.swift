@@ -17,7 +17,7 @@ let package = Package(
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
             name: "NetworkKit",
-            targets: ["Common", "NetworkHandler", "WebSocketHandler"]
+            targets: ["NetworkHandler", "WebSocketHandler"]
         ),
     ],
     dependencies: [
@@ -27,15 +27,7 @@ let package = Package(
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "Common"
-        ),
-        .testTarget(
-            name: "CommonTests",
-            dependencies: ["Common"]
-        ),
-        .target(
-            name: "NetworkHandler",
-            dependencies: [.target(name: "Common")]
+            name: "NetworkHandler"
         ),
         .testTarget(
             name: "NetworkHandlerTests",
@@ -44,7 +36,6 @@ let package = Package(
         .target(
             name: "WebSocketHandler",
             dependencies: [
-                .target(name: "Common"),
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "NIOPosix", package: "swift-nio"),
                 .product(name: "NIOHTTP1", package: "swift-nio"),

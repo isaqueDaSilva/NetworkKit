@@ -5,7 +5,6 @@
 //  Created by Isaque da Silva on 1/14/25.
 //
 
-import Common
 import Foundation
 
 /// Representation layer to handler with network tasks

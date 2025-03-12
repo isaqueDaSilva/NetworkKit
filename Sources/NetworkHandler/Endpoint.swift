@@ -12,22 +12,22 @@ public struct Endpoint: Sendable {
     /// String representation of what representation
     /// or diagram that outlines the configuration
     /// and relationships of a computer network like `https`.
-    private var scheme: String
+    private let scheme: String
     
     /// The host's representation of the place where it will be accessed.
-    private var host: String
+    private let host: String
     
     /// The path representation to access an specific URI of the host.
-    private var path: String
+    private let path: String
     
     /// The HTTP method that we'll used to access or perform action in the URI.
-    private var httpMethod: HTTPMethod
+    private let httpMethod: HTTPMethod
     
     /// The headers that we'll utilize to make request.
-    private var headers: [String: String]?
+    private let headers: [String: String]?
     
     /// The data that will be send to the request
-    private var body: Data?
+    private let body: Data?
     
     public var urlRequest: URLRequest? {
         makeRequest()

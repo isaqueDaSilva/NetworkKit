@@ -20,9 +20,6 @@ let package = Package(
             targets: ["NetworkHandler", "WebSocketHandler"]
         ),
     ],
-    dependencies: [
-        .package(url: "https://github.com/apple/swift-nio.git", from: "2.78.0")
-    ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
@@ -35,13 +32,7 @@ let package = Package(
         ),
         .target(
             name: "WebSocketHandler",
-            dependencies: [
-                .product(name: "NIOCore", package: "swift-nio"),
-                .product(name: "NIOPosix", package: "swift-nio"),
-                .product(name: "NIOHTTP1", package: "swift-nio"),
-                .product(name: "NIOWebSocket", package: "swift-nio"),
-                .product(name: "NIOFoundationCompat", package: "swift-nio")
-            ]
+            dependencies: ["NetworkHandler"]
         ),
         .testTarget(
             name: "WebSocketHandlerTests",

@@ -10,6 +10,7 @@ import Foundation
 import Network
 import os.log
 
+/// A Client's representation of a WebSocket executor.
 @WebSocketActor
 public final class WebSocketClient: NSObject, Sendable {
     private let logger = Logger(
@@ -30,9 +31,13 @@ public final class WebSocketClient: NSObject, Sendable {
         }
     }
     
+    /// A subject that broadcasts on received message to a top-level subscriber.
     public let onReceiveDataSubject: PassthroughSubject<WSMessage, Error>
+    
+    /// A subject that broadcasts the current connection state message to a top-level subscriber.
     public let connectionStateSubject: PassthroughSubject<WSConnectionState, Never>
     
+    /// Performs the connection into a WebSocket channel.
     public func connect() {
         guard wsTask == nil else {
             logger.info("The WebSocket task handler already exists")
@@ -54,6 +59,7 @@ public final class WebSocketClient: NSObject, Sendable {
         sendPing()
     }
     
+    /// Performs the disconnection into a WebSocket channel.
     public func disconnect() {
         disconnect(shouldRemoveNetworkMonitor: true, closeCode: .normalClosure)
     }
@@ -77,7 +83,9 @@ public final class WebSocketClient: NSObject, Sendable {
         }
     }
     
-    func sendMessage(_ message: WSMessage) async throws {
+    /// Send a message into a channel.
+    /// - Parameter message: The message representation that'll send into the WebSocket channel.
+    public func sendMessage(_ message: WSMessage) async throws {
         guard let wsTask, connectionState == .connected else {
             throw NSError(
                 domain: "WebSocketHandler",
@@ -169,6 +177,7 @@ public final class WebSocketClient: NSObject, Sendable {
         }
     }
     
+    /// Creates a new WebSocket client type.
     public init(
         session: URLSession = .shared,
         configuration: WebSocketConfiguration

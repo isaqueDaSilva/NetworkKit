@@ -15,7 +15,7 @@ import os.log
 public final class WebSocketClient: NSObject, Sendable {
     private let logger = Logger(
         subsystem: "com.isaqueDaSilva.WebSocketHandler",
-        category: "WebSocketHandler"
+        category: "WebSocketClient"
     )
     
     private let session: URLSession
@@ -64,7 +64,10 @@ public final class WebSocketClient: NSObject, Sendable {
         disconnect(shouldRemoveNetworkMonitor: true, closeCode: .normalClosure)
     }
     
-    private func reconnect() {
+    /// Enables the easy reconnection in the channel.
+    ///
+    /// >Note: This reconnect method do not restart the `NWPathMonitor` object. If you want to restart the monitor as well, we strongly recommend to call the ``disconnect()`` method and after call then ``connect()`` method.
+    public func reconnect() {
         disconnect(shouldRemoveNetworkMonitor: false, closeCode: .normalClosure)
         connect()
     }

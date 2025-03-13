@@ -6,6 +6,7 @@
 //
 
 import Combine
+import NetworkHandler
 import Foundation
 import Network
 import os.log
@@ -187,6 +188,14 @@ public final class WebSocketClient: NSObject, Sendable {
     ) {
         self.session = session
         self.configuration = configuration
+    }
+    
+    deinit {
+        Task { @WebSocketActor [weak self] in
+            guard let self else { return }
+            
+            self.disconnect(shouldRemoveNetworkMonitor: true, closeCode: .normalClosure)
+        }
     }
 }
 

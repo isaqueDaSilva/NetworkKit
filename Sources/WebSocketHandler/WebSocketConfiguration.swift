@@ -9,7 +9,7 @@ import struct Foundation.TimeInterval
 import NetworkHandler
 
 /// A representation data that enables the configuration process for ``WebSocketClient`` type.
-public struct WebSocketConfiguration {
+public struct WebSocketConfiguration: Sendable {
     let endpoint: Endpoint
     let timeInterval: TimeInterval
     let pingTryToReconnectCountLimit: Int

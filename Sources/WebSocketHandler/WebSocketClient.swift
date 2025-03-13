@@ -24,7 +24,7 @@ public final class WebSocketClient: NSObject, Sendable {
     private var wsTask: URLSessionWebSocketTask?
     private var pingTask: Task<Void, Never>?
     private var pingTryCount = 0
-    private(set) var connectionState: WSConnectionState {
+    private(set) var connectionState: WSConnectionState = .disconnected {
         didSet {
             connectionStateSubject.send(connectionState)
             logger.info("Connection State was changed. New State: \(self.connectionState.rawValue)")
@@ -32,10 +32,10 @@ public final class WebSocketClient: NSObject, Sendable {
     }
     
     /// A subject that broadcasts on received message to a top-level subscriber.
-    public let onReceiveDataSubject: PassthroughSubject<WSMessage, Error>
+    public let onReceiveDataSubject: PassthroughSubject<WSMessage, Error> = .init()
     
     /// A subject that broadcasts the current connection state message to a top-level subscriber.
-    public let connectionStateSubject: PassthroughSubject<WSConnectionState, Never>
+    public let connectionStateSubject: PassthroughSubject<WSConnectionState, Never> = .init()
     
     /// Performs the connection into a WebSocket channel.
     public func connect() {
@@ -178,17 +178,12 @@ public final class WebSocketClient: NSObject, Sendable {
     }
     
     /// Creates a new WebSocket client type.
-    public init(
+    nonisolated public init(
         session: URLSession = .shared,
         configuration: WebSocketConfiguration
     ) {
         self.session = session
         self.configuration = configuration
-        
-        self.onReceiveDataSubject = .init()
-        self.connectionStateSubject = .init()
-        
-        self.connectionState = .disconnected
     }
 }
 

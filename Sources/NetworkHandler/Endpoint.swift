@@ -36,7 +36,7 @@ public struct Endpoint: Sendable {
     /// Creates an URLRequest instance to perform the desired task.
     /// - Returns: Returns a configured URLRequest instance to perform task.
     internal func makeRequest() -> URLRequest? {
-        let url = URL(string: "\(scheme)://\(host)/\(path)")
+        let url = URL(string: "\(scheme)://\(host)\(path)")
         
         guard let url else {
             return nil

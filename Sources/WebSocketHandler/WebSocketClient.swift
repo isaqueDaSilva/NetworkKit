@@ -102,22 +102,18 @@ public final class WebSocketClient: NSObject, Sendable {
     private func receiveMessage() {
         guard let wsTask, connectionState == .connected else { return }
         
-        wsTask.receive { [weak self] result in
+        Task { @WebSocketActor [weak self] in
             guard let self else { return }
             
-            Task { @WebSocketActor [weak self] in
-                guard let self else { return }
-                
-                switch result {
-                case .success(let message):
-                    self.onReceiveDataSubject.send(message)
-                case .failure(let error):
-                    self.onReceiveDataSubject.send(completion: .failure(error))
-                }
-                
-                if connectionState == .connected {
-                    self.receiveMessage()
-                }
+            do {
+                let message = try await wsTask.receive()
+                self.onReceiveDataSubject.send(message)
+            } catch {
+                self.onReceiveDataSubject.send(completion: .failure(error))
+            }
+            
+            if self.connectionState == .connected {
+                self.receiveMessage()
             }
         }
     }

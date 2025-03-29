@@ -109,7 +109,7 @@ public final class WebSocketClient: NSObject, Sendable {
         
         logger.info("Start.")
         
-        Task { @WebSocketActor [weak self] in
+        Task { [weak self] in
             guard let self else { return }
             
             do {

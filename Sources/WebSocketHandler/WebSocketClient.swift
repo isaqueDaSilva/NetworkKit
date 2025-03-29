@@ -55,9 +55,7 @@ public final class WebSocketClient: NSObject, Sendable {
         self.wsTask?.resume()
         
         self.connectionState = .connecting
-        receiveMessage()
         startMonitorNetworkConnectivity()
-        sendPing()
     }
     
     /// Performs the disconnection into a WebSocket channel.
@@ -142,7 +140,10 @@ public final class WebSocketClient: NSObject, Sendable {
                 }
                 
                 if path.status != .satisfied {
-                    self.disconnect(shouldRemoveNetworkMonitor: false, closeCode: .internalServerError)
+                    self.disconnect(
+                        shouldRemoveNetworkMonitor: false,
+                        closeCode: .internalServerError
+                    )
                 }
             }
         }
@@ -211,6 +212,9 @@ extension WebSocketClient: URLSessionWebSocketDelegate {
             guard let self else { return }
             
             self.connectionState = .connected
+            logger.info("Connected in the channel")
+            receiveMessage()
+            sendPing()
         }
     }
     
@@ -222,6 +226,8 @@ extension WebSocketClient: URLSessionWebSocketDelegate {
             
             self.connectionStateSubject.send(completion: .finished)
             self.onReceiveDataSubject.send(completion: .finished)
+            
+            logger.info("Desconnected from the channel")
         }
     }
 }

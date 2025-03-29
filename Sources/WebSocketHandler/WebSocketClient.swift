@@ -55,7 +55,9 @@ public final class WebSocketClient: NSObject, Sendable {
         self.wsTask?.resume()
         
         self.connectionState = .connecting
+        receiveMessage()
         startMonitorNetworkConnectivity()
+        sendPing()
     }
     
     /// Performs the disconnection into a WebSocket channel.
@@ -115,15 +117,13 @@ public final class WebSocketClient: NSObject, Sendable {
             do {
                 let message = try await wsTask.receive()
                 self.onReceiveDataSubject.send(message)
-                logger.info("Receive and transmit the message with success.")
+                logger.info("Received and transmited the message with success.")
             } catch {
                 self.onReceiveDataSubject.send(completion: .failure(error))
                 logger.error("Failed to receive message.")
             }
             
-            if self.connectionState == .connected {
-                self.receiveMessage()
-            }
+            self.receiveMessage()
         }
     }
     
@@ -211,8 +211,6 @@ extension WebSocketClient: URLSessionWebSocketDelegate {
             guard let self else { return }
             
             self.connectionState = .connected
-            receiveMessage()
-            sendPing()
         }
     }
     

@@ -100,7 +100,14 @@ public final class WebSocketClient: NSObject, Sendable {
     }
     
     private func receiveMessage() {
-        guard let wsTask, connectionState == .connected else { return }
+        guard let wsTask, connectionState == .connected else {
+            logger.info(
+                "Abort check if has message. Status: WS Task: \(self.wsTask == nil ? "Inactive" : "Active"); Connection State: \(self.connectionState.rawValue)"
+            )
+            return
+        }
+        
+        logger.info("Start.")
         
         Task { @WebSocketActor [weak self] in
             guard let self else { return }
@@ -108,8 +115,10 @@ public final class WebSocketClient: NSObject, Sendable {
             do {
                 let message = try await wsTask.receive()
                 self.onReceiveDataSubject.send(message)
+                logger.info("Receive and transmit the message with success.")
             } catch {
                 self.onReceiveDataSubject.send(completion: .failure(error))
+                logger.error("Failed to receive message.")
             }
             
             if self.connectionState == .connected {

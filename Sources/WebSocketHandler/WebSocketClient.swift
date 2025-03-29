@@ -55,9 +55,7 @@ public final class WebSocketClient: NSObject, Sendable {
         self.wsTask?.resume()
         
         self.connectionState = .connecting
-        receiveMessage()
         startMonitorNetworkConnectivity()
-        sendPing()
     }
     
     /// Performs the disconnection into a WebSocket channel.
@@ -136,7 +134,6 @@ public final class WebSocketClient: NSObject, Sendable {
                 
                 if path.status != .satisfied {
                     self.disconnect(shouldRemoveNetworkMonitor: false, closeCode: .internalServerError)
-                    
                 }
             }
         }
@@ -205,6 +202,8 @@ extension WebSocketClient: URLSessionWebSocketDelegate {
             guard let self else { return }
             
             self.connectionState = .connected
+            receiveMessage()
+            sendPing()
         }
     }
     

@@ -12,7 +12,7 @@ import Network
 import os.log
 
 @WebSocketActor
-class WebSocketClient: NSObject, Sendable {
+public class WebSocketClient: NSObject, Sendable {
     private let logger = Logger(
         subsystem: "com.isaqueDaSilva.WebSocket",
         category: "WebSocketClient"
@@ -26,9 +26,9 @@ class WebSocketClient: NSObject, Sendable {
     private var pingTask: Task<Void, Never>?
     private var pingTryCount = 0
     
-    var onReceive: ((WebSocketClientMessage) -> Void)?
-    var errorHandler: ((WebSocketError) -> Void)?
-    var onConnectionStateChange: ((ConnectionState) -> Void)?
+    public var onReceive: ((WebSocketClientMessage) -> Void)?
+    public var errorHandler: ((WebSocketError) -> Void)?
+    public var onConnectionStateChange: ((ConnectionState) -> Void)?
     
     private(set) var connectionState = ConnectionState.disconnected {
         didSet {
@@ -36,7 +36,7 @@ class WebSocketClient: NSObject, Sendable {
         }
     }
     
-    func connect() {
+    public func connect() {
         guard wsTask == nil else {
             logger.info("WebSocket Task is already exists")
             return
@@ -63,7 +63,7 @@ class WebSocketClient: NSObject, Sendable {
         
     }
     
-    func send(_ message: WebSocketClientMessage) async throws(WebSocketError) {
+    public func send(_ message: WebSocketClientMessage) async throws(WebSocketError) {
         guard let task = wsTask, connectionState == .connected else {
             logger.error(
                 "Cannot possible to send a message. WS Task: \(self.wsTask == nil ? "On" : "Off"); Connection State: \(self.connectionState.rawValue)"
@@ -81,7 +81,7 @@ class WebSocketClient: NSObject, Sendable {
         }
     }
     
-    func disconnect() {
+    public func disconnect() {
         disconnect(shouldRemoveNetworkMonitor: true)
     }
     
@@ -182,13 +182,22 @@ class WebSocketClient: NSObject, Sendable {
 
 extension WebSocketClient: URLSessionWebSocketDelegate {
     
-    nonisolated func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
+    nonisolated public func urlSession(
+        _ session: URLSession,
+        webSocketTask: URLSessionWebSocketTask,
+        didOpenWithProtocol protocol: String?
+    ) {
         Task { @WebSocketActor [weak self] in
             self?.connectionState = .connected
         }
     }
     
-    nonisolated func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
+    nonisolated public func urlSession(
+        _ session: URLSession,
+        webSocketTask: URLSessionWebSocketTask,
+        didCloseWith closeCode: URLSessionWebSocketTask.CloseCode,
+        reason: Data?
+    ) {
         Task { @WebSocketActor [weak self] in
             self?.connectionState = .disconnected
         }

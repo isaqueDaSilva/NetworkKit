@@ -7,5 +7,5 @@
 
 import Foundation
 
-public typealias WSMessage = URLSessionWebSocketTask.Message
+public typealias WebSocketClientMessage = URLSessionWebSocketTask.Message
 public typealias CloseCode = URLSessionWebSocketTask.CloseCode

@@ -7,9 +7,11 @@
 
 import Foundation
 
-extension WebSocketSwiftNIOClient {
+extension WebSocketClient {
     /// An error collection that may occur when execution the WebSocket channel.
     public enum WebSocketError: Error, LocalizedError, Sendable {
+        case failedToSendData
+        case notUpgraded
         case decodingError
         case noConnection
         case unknownError(Error)
@@ -17,14 +19,18 @@ extension WebSocketSwiftNIOClient {
         
         public var errorDescription: String? {
             switch self {
+            case .failedToSendData:
+                "Failed to send data in the channel."
             case .decodingError:
-                NSLocalizedString("Failed to decode a data coming from the channel.", comment: "")
+                "Failed to decode a data coming from the channel."
             case .noConnection:
-                NSLocalizedString("They are no connections available to handle with this task.", comment: "")
+                "They are no connections available to handle with this task."
             case .unknownError(let error):
-                NSLocalizedString("An unexpected error occur. Error: \(error.localizedDescription)", comment: "")
+                "An unexpected error occur. Error: \(error.localizedDescription)"
             case .dataNotSuported:
-                NSLocalizedString("An unexpected data type was received.", comment: "")
+                "An unexpected data type was received."
+            case .notUpgraded:
+                "The channel was not upgraded correctly."
             }
         }
     }

@@ -11,16 +11,16 @@ import NetworkHandler
 /// A representation data that enables the configuration process for ``WebSocketClient`` type.
 public struct WebSocketConfiguration: Sendable {
     let endpoint: Endpoint
-    let timeInterval: TimeInterval
+    let pingInterval: TimeInterval
     let pingTryToReconnectCountLimit: Int
     
     public init(
         endpoint: Endpoint,
-        timeInterval: TimeInterval = 20,
+        pingInterval: TimeInterval = 20,
         pingTryToReconnectCountLimit: Int = 3
     ) {
         self.endpoint = endpoint
-        self.timeInterval = timeInterval
+        self.pingInterval = pingInterval
         self.pingTryToReconnectCountLimit = pingTryToReconnectCountLimit
     }
 }

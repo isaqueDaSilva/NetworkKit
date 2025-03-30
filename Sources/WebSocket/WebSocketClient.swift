@@ -26,17 +26,12 @@ public class WebSocketClient: NSObject, Sendable {
     private var pingTask: Task<Void, Never>?
     private var pingTryCount = 0
     
-    public var onReceive: ((WebSocketClientMessage) -> Void)?
-    public var errorHandler: ((WebSocketError) -> Void)?
-    public var onConnectionStateChange: ((ConnectionState) -> Void)?
+    var onReceive: ((WebSocketClientMessage) -> Void)?
+    var errorHandler: ((WebSocketError) -> Void)?
     
-    private(set) var connectionState = ConnectionState.disconnected {
-        didSet {
-            onConnectionStateChange?(connectionState)
-        }
-    }
+    public var connectionState: ConnectionState = .disconnected
     
-    public func connect() {
+    func connect() {
         guard wsTask == nil else {
             logger.info("WebSocket Task is already exists")
             return
@@ -60,7 +55,6 @@ public class WebSocketClient: NSObject, Sendable {
         receiveMessage()
         startMonitorNetworkConnectivity()
         schedulePing()
-        
     }
     
     public func send(_ message: WebSocketClientMessage) async throws(WebSocketError) {
@@ -173,9 +167,40 @@ public class WebSocketClient: NSObject, Sendable {
         }
     }
     
-    nonisolated public init(configuration: WebSocketConfiguration, session: URLSession = .init(configuration: .default)) {
+    nonisolated init(configuration: WebSocketConfiguration, session: URLSession = .init(configuration: .default)) {
         self.configuration = configuration
         self.session = session
+    }
+}
+
+extension WebSocketClient {
+    public typealias OnReceiveDataStream = AsyncThrowingStream<WebSocketClientMessage, Error>
+     
+    nonisolated static public func configure(
+        configuration: WebSocketConfiguration,
+        session: URLSession = .init(configuration: .default)
+    ) -> (WebSocketClient, OnReceiveDataStream){
+        let wsClient = WebSocketClient(configuration: configuration, session: session)
+        
+        var onReceiveDataStream: OnReceiveDataStream {
+            .init { continuation in
+                wsClient.onReceive = { message in
+                    continuation.yield(message)
+                }
+                
+                wsClient.errorHandler = { error in
+                    continuation.finish(throwing: error)
+                }
+                
+                continuation.onTermination = { @Sendable _ in
+                    wsClient.disconnect()
+                }
+                
+                wsClient.connect()
+            }
+        }
+        
+        return (wsClient, onReceiveDataStream)
     }
 }
 
@@ -188,7 +213,11 @@ extension WebSocketClient: URLSessionWebSocketDelegate {
         didOpenWithProtocol protocol: String?
     ) {
         Task { @WebSocketActor [weak self] in
-            self?.connectionState = .connected
+            guard let self else { return }
+            
+            self.connectionState = .connected
+            
+            self.logger.info("Connected on the channel.")
         }
     }
     
@@ -199,7 +228,11 @@ extension WebSocketClient: URLSessionWebSocketDelegate {
         reason: Data?
     ) {
         Task { @WebSocketActor [weak self] in
-            self?.connectionState = .disconnected
+            guard let self else { return }
+            
+            self.connectionState = .disconnected
+            
+            self.logger.info("Disconnected from the channel.")
         }
     }
     

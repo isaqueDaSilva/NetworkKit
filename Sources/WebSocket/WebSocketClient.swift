@@ -171,7 +171,7 @@ public class WebSocketClient: NSObject, Sendable {
         }
     }
     
-    nonisolated init(configuration: WebSocketConfiguration, session: URLSession = .init(configuration: .default)) {
+    nonisolated public init(configuration: WebSocketConfiguration, session: URLSession = .init(configuration: .default)) {
         self.configuration = configuration
         self.session = session
     }

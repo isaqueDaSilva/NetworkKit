@@ -35,7 +35,7 @@ public class WebSocketClient: NSObject, Sendable {
         }
     }
     
-    func connect() {
+    public func connect() {
         guard wsTask == nil else {
             logger.info("WebSocket Task is already exists")
             return

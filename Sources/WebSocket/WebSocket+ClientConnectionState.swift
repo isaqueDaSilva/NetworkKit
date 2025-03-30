@@ -7,7 +7,7 @@
 
 extension WebSocketClient {
     /// Representation of the current state of a WebSocket channel.
-    public enum ConnectionState: String {
+    public enum ConnectionState: String, Sendable {
         case disconnected = "Disconnected"
         case connecting = "Connecting"
         case connected = "Connected"

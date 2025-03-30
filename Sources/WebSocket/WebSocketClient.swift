@@ -183,7 +183,7 @@ extension WebSocketClient {
         let wsClient = WebSocketClient(configuration: configuration, session: session)
         
         var onReceiveDataStream: OnReceiveDataStream {
-            .init { continuation in
+            .init { @WebSocketActor continuation in
                 wsClient.onReceive = { message in
                     continuation.yield(message)
                 }

@@ -26,10 +26,14 @@ public class WebSocketClient: NSObject, Sendable {
     private var pingTask: Task<Void, Never>?
     private var pingTryCount = 0
     
-    var onReceive: ((WebSocketClientMessage) -> Void)?
-    var errorHandler: ((WebSocketError) -> Void)?
+    public var onReceiveMessageSubject: PassthroughSubject<WebSocketClientMessage, WebSocketError> = .init()
+    public var connectionStateSubject: CurrentValueSubject<ConnectionState, Never> = .init(.disconnected)
     
-    public var connectionState: ConnectionState = .disconnected
+    public var connectionState: ConnectionState = .disconnected {
+        didSet {
+            connectionStateSubject.send(connectionState)
+        }
+    }
     
     func connect() {
         guard wsTask == nil else {
@@ -38,7 +42,7 @@ public class WebSocketClient: NSObject, Sendable {
         }
         
         guard let request = configuration.endpoint.urlRequest else {
-            errorHandler?(.notUpgraded)
+            onReceiveMessageSubject.send(completion: .failure(.notUpgraded))
             logger.error(
                 "Cannot possible to make an upgrade in the channel because is missing a url request."
             )
@@ -105,10 +109,10 @@ public class WebSocketClient: NSObject, Sendable {
                 guard let self else { return }
                 switch result {
                 case .success(let message):
-                    self.onReceive?(message)
+                    self.onReceiveMessageSubject.send(message)
                     logger.info("Message transmited with success.")
                 case .failure(let failure):
-                    self.errorHandler?(.unknownError(failure))
+                    self.onReceiveMessageSubject.send(completion: .failure(.unknownError(failure)))
                     logger.error("Error when we receive a message. Error: \(failure.localizedDescription)")
                 }
                 
@@ -172,38 +176,6 @@ public class WebSocketClient: NSObject, Sendable {
         self.session = session
     }
 }
-
-extension WebSocketClient {
-    public typealias OnReceiveDataStream = AsyncThrowingStream<WebSocketClientMessage, Error>
-     
-    nonisolated static public func configure(
-        configuration: WebSocketConfiguration,
-        session: URLSession = .init(configuration: .default)
-    ) -> (WebSocketClient, OnReceiveDataStream){
-        let wsClient = WebSocketClient(configuration: configuration, session: session)
-        
-        var onReceiveDataStream: OnReceiveDataStream {
-            .init { @WebSocketActor continuation in
-                wsClient.onReceive = { message in
-                    continuation.yield(message)
-                }
-                
-                wsClient.errorHandler = { error in
-                    continuation.finish(throwing: error)
-                }
-                
-                continuation.onTermination = { @Sendable _ in
-                    wsClient.disconnect()
-                }
-                
-                wsClient.connect()
-            }
-        }
-        
-        return (wsClient, onReceiveDataStream)
-    }
-}
-
 
 extension WebSocketClient: URLSessionWebSocketDelegate {
     

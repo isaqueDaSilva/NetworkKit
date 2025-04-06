@@ -11,30 +11,47 @@ import Foundation
 import Network
 import os.log
 
+/// The main representation of the WebSocket client.
 @WebSocketActor
 public class WebSocketClient: NSObject, Sendable {
+    /// Default logger of the WS client.
     private let logger = Logger(
         subsystem: "com.isaqueDaSilva.WebSocket",
         category: "WebSocketClient"
     )
     
+    /// Default session that the WebSocket will be created from.
     private let session: URLSession
+    
+    /// Deafult configuration of the client.
     private let configuration: WebSocketConfiguration
     
+    /// Default instance of the network monitor.
     private var monitor: NWPathMonitor?
+    
+    /// The default representation of the ws channel.
     private var wsTask: URLSessionWebSocketTask?
+    
+    /// The default ping executor.
     private var pingTask: Task<Void, Never>?
+    
+    /// A counter that stores the current number of times that we try to send a ping.
     private var pingTryCount = 0
     
+    /// A default combine subject that transimit all messages to a top level application.
     public var onReceiveMessageSubject: PassthroughSubject<WebSocketClientMessage, WebSocketError> = .init()
+    
+    /// A default combine subject that transimit the current state of the connection status.
     public var connectionStateSubject: CurrentValueSubject<ConnectionState, Never> = .init(.disconnected)
     
-    public var connectionState: ConnectionState = .disconnected {
+    /// A representation of the current connection sttae
+    private var connectionState: ConnectionState = .disconnected {
         didSet {
             connectionStateSubject.send(connectionState)
         }
     }
     
+    /// Establishes a connection in a ws channel.
     public func connect() {
         guard wsTask == nil else {
             logger.info("WebSocket Task is already exists")
@@ -53,14 +70,12 @@ public class WebSocketClient: NSObject, Sendable {
         wsTask?.delegate = self
         wsTask?.resume()
         
-        logger.info("Starting the channel connection")
-        
         connectionState = .connecting
-        receiveMessage()
-        startMonitorNetworkConnectivity()
-        schedulePing()
+        
+        logger.info("Starting the channel connection")
     }
     
+    /// Send an ``WebSocketClientMessage`` to the channel.
     public func send(_ message: WebSocketClientMessage) async throws(WebSocketError) {
         guard let task = wsTask, connectionState == .connected else {
             logger.error(
@@ -79,10 +94,14 @@ public class WebSocketClient: NSObject, Sendable {
         }
     }
     
+    /// Removes a connection from the channel and the cancels the network monitor execution.
     public func disconnect() {
         disconnect(shouldRemoveNetworkMonitor: true)
     }
     
+    /// Removes a connection from the channel.
+    /// - Parameter shouldRemoveNetworkMonitor: Defines if you wants to disconnect only the ws channel
+    /// or you wants to stop the network monitor as well.
     private func disconnect(shouldRemoveNetworkMonitor: Bool) {
         self.wsTask?.cancel()
         self.wsTask = nil
@@ -97,12 +116,14 @@ public class WebSocketClient: NSObject, Sendable {
         logger.info("Channel was diconnected with success.")
     }
     
+    /// Performs the reconnection from the channel.
     private func reconnect() {
         logger.info("Starting reconnection...")
         self.disconnect(shouldRemoveNetworkMonitor: false)
         self.connect()
     }
     
+    /// Handles with the incoming messages.
     private func receiveMessage() {
         self.wsTask?.receive { result in
             Task { @WebSocketActor [weak self] in
@@ -123,6 +144,7 @@ public class WebSocketClient: NSObject, Sendable {
         }
     }
     
+    /// Starts the network monitor.
     private func startMonitorNetworkConnectivity() {
         guard monitor == nil else { return }
         monitor = .init()
@@ -142,6 +164,7 @@ public class WebSocketClient: NSObject, Sendable {
         monitor?.start(queue: .main)
     }
     
+    /// Schedule when the ping will be sent to the server.
     private func schedulePing() {
         pingTask?.cancel()
         pingTryCount = 0
@@ -171,6 +194,10 @@ public class WebSocketClient: NSObject, Sendable {
         }
     }
     
+    /// Creates a new instance of the ``WebSocketClient``.
+    /// - Parameters:
+    ///   - configuration: The default configuration of the channel.
+    ///   - session: The default URLSession instance that the WebSocket channel will be created,
     nonisolated public init(configuration: WebSocketConfiguration, session: URLSession = .init(configuration: .default)) {
         self.configuration = configuration
         self.session = session
@@ -188,6 +215,9 @@ extension WebSocketClient: URLSessionWebSocketDelegate {
             guard let self else { return }
             
             self.connectionState = .connected
+            receiveMessage()
+            startMonitorNetworkConnectivity()
+            schedulePing()
             
             self.logger.info("Connected on the channel.")
         }

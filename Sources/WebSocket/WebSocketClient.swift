@@ -70,9 +70,12 @@ public class WebSocketClient: NSObject, Sendable {
         wsTask?.delegate = self
         wsTask?.resume()
         
-        connectionState = .connecting
-        
         logger.info("Starting the channel connection")
+        
+        connectionState = .connecting
+        receiveMessage()
+        startMonitorNetworkConnectivity()
+        schedulePing()
     }
     
     /// Send an ``WebSocketClientMessage`` to the channel.
@@ -215,9 +218,6 @@ extension WebSocketClient: URLSessionWebSocketDelegate {
             guard let self else { return }
             
             self.connectionState = .connected
-            receiveMessage()
-            startMonitorNetworkConnectivity()
-            schedulePing()
             
             self.logger.info("Connected on the channel.")
         }
